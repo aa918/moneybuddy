@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --color-brand-blue-deep: #0F1F35;
+  --color-brand-blue-card: #162D4A;
+  --color-brand-slate-light: #F8FAFC;
+  --color-brand-mint: #34D399;
+  --color-brand-mint-dark: #10B981;
+  --color-text-dark-bg: #F0FFF4;
+  --color-text-light-bg: #1E293B;
+  
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+  
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-text-light-bg);
+    background-color: var(--color-brand-blue-deep);
+  }
+  
+  /* Prevent scrolling on outer desktop wrapper */
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* Custom premium styles */
+.glassmorphism {
+  background: rgba(15, 31, 53, 0.75);
+  backdrop-filter: blur(20px) saturate(190%);
+  -webkit-backdrop-filter: blur(20px) saturate(190%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(22, 45, 74, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Hide scrollbars for a neat app experience */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Pulsing currency cursor for oversized amounts */
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.pulsing-cursor::after {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 2.5rem;
+  background-color: #34D399;
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: cursor-blink 1s infinite;
+}
+
+/* Glow effects */
+.glow-mint {
+  box-shadow: 0 0 20px rgba(52, 211, 153, 0.25);
+}
+
+.glow-rose {
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.35);
+}
+
+.glow-button {
+  box-shadow: 0 4px 14px 0 rgba(52, 211, 153, 0.35);
+}
