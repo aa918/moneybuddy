@@ -58,7 +58,7 @@ const getCategoryStyles = (category, type) => {
   }
 };
 
-const TransactionItem = ({ title, amount, category, type, date }) => {
+const TransactionItem = ({ title, amount, category, type, date, onClick }) => {
   const styles = getCategoryStyles(category, type);
   const Icon = styles.icon;
 
@@ -68,7 +68,10 @@ const TransactionItem = ({ title, amount, category, type, date }) => {
   });
 
   return (
-    <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 active:scale-[0.98] transition-all duration-200 cursor-pointer group select-none">
+    <div 
+      onClick={onClick}
+      className="flex items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 active:scale-[0.98] transition-all duration-200 cursor-pointer group select-none"
+    >
       <div className="flex items-center gap-3">
         {/* Soft-colored rounded icon slot */}
         <div className={`p-2.5 rounded-xl ${styles.bgColor} ${styles.iconColor} transition-transform duration-250 group-hover:scale-105`}>

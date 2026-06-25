@@ -83,6 +83,8 @@ export const AppProvider = ({ children }) => {
           title: exp.description || (exp.categories?.name ? `${exp.categories.name} Purchase` : 'Expense'),
           amount: parseFloat(exp.amount || 0),
           category: exp.categories?.name || 'Others',
+          categoryId: exp.category_id,
+          rawDescription: exp.description,
           type: 'expense',
           date: exp.created_at
         }));
@@ -152,6 +154,54 @@ export const AppProvider = ({ children }) => {
       return { success: true, data };
     } catch (err) {
       console.error('Unexpected error during profile upsert:', err);
+      return { success: false, error: err };
+    }
+  };
+
+  // Update existing expense in Supabase
+  const updateExpense = async (expenseId, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('expenses')
+        .update({
+          amount: parseFloat(updates.amount),
+          category_id: updates.category_id,
+          description: updates.description,
+          created_at: updates.created_at
+        })
+        .eq('id', expenseId)
+        .select();
+
+      if (error) {
+        console.error('Error updating expense in database:', error);
+        return { success: false, error };
+      }
+
+      await refreshData();
+      return { success: true, data };
+    } catch (err) {
+      console.error('Unexpected error updating expense:', err);
+      return { success: false, error: err };
+    }
+  };
+
+  // Delete existing expense from Supabase
+  const deleteExpense = async (expenseId) => {
+    try {
+      const { error } = await supabase
+        .from('expenses')
+        .delete()
+        .eq('id', expenseId);
+
+      if (error) {
+        console.error('Error deleting expense from database:', error);
+        return { success: false, error };
+      }
+
+      await refreshData();
+      return { success: true };
+    } catch (err) {
+      console.error('Unexpected error deleting expense:', err);
       return { success: false, error: err };
     }
   };
@@ -227,6 +277,8 @@ export const AppProvider = ({ children }) => {
       profile,
       createProfile,
       updateProfile,
+      updateExpense,
+      deleteExpense,
       refreshData,
       togglePremium,
       totalExpenses,
