@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import { useToast } from '../context/ToastContext';
 import { supabase } from '../lib/supabase';
 import { 
   Utensils, 
@@ -27,6 +28,7 @@ const iconMap = {
 
 const AddExpense = () => {
   const { categories, rawUser, refreshData } = useApp();
+  const { addToast } = useToast();
   const navigate = useNavigate();
   
   const [amount, setAmount] = useState('');
@@ -92,11 +94,10 @@ const AddExpense = () => {
         .select();
 
       if (insertErr) {
-        // Critical requirement: log with console.error and halt state updates
         console.error('Supabase expense insert failed:', insertErr);
-        setError(`Failed to save expense: ${insertErr.message}`);
+        addToast('Failed to save expense. Please try again.', 'error');
         setIsSubmitting(false);
-        return; // Abort navigation and state updates
+        return;
       }
 
       // 2. Refresh global state (only if insert succeeds)
@@ -110,7 +111,7 @@ const AddExpense = () => {
       navigate('/dashboard');
     } catch (err) {
       console.error('Unexpected error inserting expense:', err);
-      setError('An unexpected connection error occurred.');
+      addToast('An unexpected error occurred. Please try again.', 'error');
       setIsSubmitting(false);
     }
   };
@@ -202,6 +203,7 @@ const AddExpense = () => {
           <div className="mt-4 w-full max-w-[250px]">
             <input
               type="text"
+              dir="auto"
               placeholder="Vendor description (e.g., Wolt, Uber)"
               value={vendor}
               onChange={(e) => setVendor(e.target.value)}

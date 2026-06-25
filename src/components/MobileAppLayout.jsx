@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import BottomNav from './BottomNav';
+import Toast from './Toast';
 import { ArrowLeft, Bell, Crown } from 'lucide-react';
 
 const MobileAppLayout = ({ children }) => {
@@ -30,6 +31,8 @@ const MobileAppLayout = ({ children }) => {
         return <span className="font-semibold text-lg text-white">Add Expense</span>;
       case '/profile':
         return <span className="font-semibold text-lg text-white">Profile & Settings</span>;
+      case '/history':
+        return <span className="font-semibold text-lg text-white">History</span>;
       default:
         return <span className="font-semibold text-lg text-white">MoneyBuddy</span>;
     }
@@ -101,6 +104,9 @@ const MobileAppLayout = ({ children }) => {
             </div>
           </header>
         )}
+
+        {/* Toast notification layer — absolute inside the frame, below header */}
+        {!hideBars && <Toast />}
 
         {/* Page Content Body (Scrollable with hidden scrollbars) */}
         <main className="flex-1 overflow-y-auto no-scrollbar relative flex flex-col bg-slate-950">

@@ -75,7 +75,7 @@ const TransactionItem = ({ title, amount, category, type, date }) => {
           <Icon size={16} className="stroke-[2.2]" />
         </div>
         <div>
-          <h4 className="text-sm font-semibold text-white tracking-tight">{title}</h4>
+          <h4 dir="auto" className="text-sm font-semibold text-white tracking-tight">{title}</h4>
           <span className="text-[10px] text-slate-400 font-medium">{category} • {formattedDate}</span>
         </div>
       </div>

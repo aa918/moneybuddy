@@ -12,6 +12,7 @@ export const AppProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [profile, setProfile] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
 
   // Fetch real categories, expenses, and profile from Supabase
   const fetchUserData = async (userId) => {
@@ -95,7 +96,9 @@ export const AppProvider = ({ children }) => {
   // Helper function to allow manual triggers of state refreshes
   const refreshData = async () => {
     if (user) {
+      setIsFetching(true);
       await fetchUserData(user.id);
+      setIsFetching(false);
     }
   };
 
@@ -217,6 +220,7 @@ export const AppProvider = ({ children }) => {
       rawUser: user,
       session,
       loading,
+      isFetching,
       isPremium,
       categories,
       transactions,

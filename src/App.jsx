@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { AppProvider, useApp } from './context/AppContext';
+import { ToastProvider } from './context/ToastContext';
 import MobileAppLayout from './components/MobileAppLayout';
 import { Wallet } from 'lucide-react';
 
@@ -10,6 +11,7 @@ import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import AddExpense from './pages/AddExpense';
 import Profile from './pages/Profile';
+import History from './pages/History';
 import './App.css';
 
 // AnimatedRoutes handles routing state, session checks, and redirection guards
@@ -67,6 +69,7 @@ const AnimatedRoutes = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/add-expense" element={<AddExpense />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/history" element={<History />} />
         {/* Dynamic redirection fallback */}
         <Route
           path="/"
@@ -84,11 +87,13 @@ const AnimatedRoutes = () => {
 function App() {
   return (
     <AppProvider>
-      <BrowserRouter>
-        <MobileAppLayout>
-          <AnimatedRoutes />
-        </MobileAppLayout>
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <MobileAppLayout>
+            <AnimatedRoutes />
+          </MobileAppLayout>
+        </BrowserRouter>
+      </ToastProvider>
     </AppProvider>
   );
 }

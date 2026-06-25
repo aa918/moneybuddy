@@ -4,11 +4,23 @@ import { useApp } from '../context/AppContext';
 import BudgetCard from '../components/BudgetCard';
 import TransactionItem from '../components/TransactionItem';
 import InsightCard from '../components/InsightCard';
-import { Sparkles, AlertTriangle, TrendingUp } from 'lucide-react';
+import { Sparkles, AlertTriangle, TrendingUp, Receipt, Plus } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { useNavigate } from 'react-router-dom';
+
+const listVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06 } }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.25 } }
+};
 
 const Dashboard = () => {
-  const { user, transactions, profile, totalExpenses, isPremium } = useApp();
+  const { user, transactions, profile, totalExpenses, isPremium, isFetching } = useApp();
+  const navigate = useNavigate();
 
   // Show only the 5 most recent transactions
   const recentTransactions = transactions.slice(0, 5);
@@ -164,29 +176,64 @@ const Dashboard = () => {
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
             Recent Activity
           </h3>
-          <button className="text-xs font-bold text-brand-mint hover:underline active:scale-95 transition-all cursor-pointer">
+          <button
+            onClick={() => navigate('/history')}
+            className="text-xs font-bold text-brand-mint hover:underline active:scale-95 transition-all cursor-pointer"
+          >
             View All
           </button>
         </div>
-        
-        <div className="flex flex-col gap-2">
-          {recentTransactions.length === 0 ? (
-            <div className="p-8 text-center text-slate-500 text-xs">
-              No transactions logged yet. Add your first expense!
+
+        {/* Shimmer skeletons while data refreshes */}
+        {isFetching && (
+          <div className="flex flex-col gap-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="skeleton h-14 w-full" />
+            ))}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!isFetching && recentTransactions.length === 0 && (
+          <div className="flex flex-col items-center justify-center text-center py-10 gap-3 select-none">
+            <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-slate-500">
+              <Receipt size={28} className="stroke-[1.5]" />
             </div>
-          ) : (
-            recentTransactions.map((tx) => (
-              <TransactionItem
-                key={tx.id}
-                title={tx.title}
-                amount={tx.amount}
-                category={tx.category}
-                type={tx.type}
-                date={tx.date}
-              />
-            ))
-          )}
-        </div>
+            <div>
+              <p className="text-sm font-bold text-white">No expenses yet</p>
+              <p className="text-xs text-slate-400 mt-0.5">Tap + to log your first expense</p>
+            </div>
+            <button
+              onClick={() => navigate('/add-expense')}
+              className="flex items-center gap-2 px-4 py-2.5 bg-brand-mint text-slate-950 rounded-xl font-bold text-[10px] uppercase tracking-wider glow-button active:scale-95 transition-all cursor-pointer"
+            >
+              <Plus size={12} className="stroke-[2.5]" />
+              Add Expense
+            </button>
+          </div>
+        )}
+
+        {/* Stagger-animated transaction list */}
+        {!isFetching && recentTransactions.length > 0 && (
+          <motion.div
+            className="flex flex-col gap-2"
+            variants={listVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {recentTransactions.map((tx) => (
+              <motion.div key={tx.id} variants={itemVariants}>
+                <TransactionItem
+                  title={tx.title}
+                  amount={tx.amount}
+                  category={tx.category}
+                  type={tx.type}
+                  date={tx.date}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

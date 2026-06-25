@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import { useToast } from '../context/ToastContext';
 import { supabase } from '../lib/supabase';
 import { 
   ChevronRight, 
@@ -22,6 +23,7 @@ import {
 
 const Profile = () => {
   const { user, isPremium, togglePremium, profile, updateProfile, loading } = useApp();
+  const { addToast } = useToast();
   const navigate = useNavigate();
 
   const [isEditingIncome, setIsEditingIncome] = useState(false);
@@ -56,13 +58,21 @@ const Profile = () => {
     const val = parseFloat(editedIncome);
     if (isNaN(val) || val <= 0) return;
     setIsSavingIncome(true);
-    await updateProfile({ monthly_income: val, budget: val });
+    const res = await updateProfile({ monthly_income: val, budget: val });
     setIsSavingIncome(false);
     setIsEditingIncome(false);
+    if (res?.success) {
+      addToast('Monthly income updated', 'success');
+    } else {
+      addToast('Failed to update income. Try again.', 'error');
+    }
   };
 
   const handleUpdateInvesting = async (pref) => {
-    await updateProfile({ investment_status: pref });
+    const res = await updateProfile({ investment_status: pref });
+    if (res?.success) {
+      addToast('Preference saved', 'success');
+    }
   };
 
   return (
