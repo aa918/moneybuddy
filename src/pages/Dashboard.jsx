@@ -5,8 +5,9 @@ import BudgetCard from '../components/BudgetCard';
 import TransactionItem from '../components/TransactionItem';
 import InsightCard from '../components/InsightCard';
 import { Sparkles, AlertTriangle, TrendingUp, Receipt, Plus } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useNavigate } from 'react-router-dom';
+import CategoryDonut from '../components/CategoryDonut';
+import SpendingBar from '../components/SpendingBar';
 
 const listVariants = {
   hidden: {},
@@ -19,7 +20,7 @@ const itemVariants = {
 };
 
 const Dashboard = () => {
-  const { user, transactions, profile, totalExpenses, isPremium, isFetching } = useApp();
+  const { user, transactions, profile, isPremium, isFetching } = useApp();
   const navigate = useNavigate();
 
   // Show only the 5 most recent transactions
@@ -27,20 +28,6 @@ const Dashboard = () => {
 
   // Fetch monthly_income from profile (fallback to 0 if loading/unset)
   const incomeVal = profile ? parseFloat(profile.monthly_income || 0) : 0;
-  const expensesVal = totalExpenses; // SUM(expenses)
-
-  // Pie chart contains exactly two data points:
-  // A) "Income" (value = monthly_income, color = #10B981)
-  // B) "Expenses" (value = SUM(expenses), color = #EF4444)
-  // If expenses are 0, render only the Income slice to show a full green circle.
-  const chartData = expensesVal > 0
-    ? [
-        { name: 'Income', value: incomeVal, color: '#10B981' },
-        { name: 'Expenses', value: expensesVal, color: '#EF4444' }
-      ]
-    : [
-        { name: 'Income', value: incomeVal || 1, color: '#10B981' } // fallback to 1 to show a complete circle
-      ];
 
   return (
     <motion.div
@@ -89,57 +76,11 @@ const Dashboard = () => {
       {/* Hero Budget Display */}
       <BudgetCard />
 
-      {/* Expense Allocation Card */}
-      <div className="bg-brand-blue-card rounded-3xl p-5 border border-white/5 flex flex-col gap-4 select-none relative">
-        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          Income vs Expenses
-        </h3>
-        
-        <div className="h-[210px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="45%"
-                innerRadius={55}
-                outerRadius={75}
-                paddingAngle={expensesVal > 0 ? 4 : 0}
-                dataKey="value"
-              >
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} style={{ outline: 'none' }} />
-                ))}
-              </Pie>
-              <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    const data = payload[0].payload;
-                    const totalVal = incomeVal + expensesVal;
-                    const percentage = totalVal > 0 ? ((data.value / totalVal) * 100).toFixed(0) : 0;
-                    return (
-                      <div className="bg-[#0F1F35]/95 border border-white/10 px-3 py-2.5 rounded-2xl shadow-xl backdrop-blur-md">
-                        <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-0.5">{data.name}</p>
-                        <p className="text-xs font-black text-white">${data.value.toLocaleString()} ({percentage}%)</p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Legend
-                iconType="circle"
-                iconSize={8}
-                formatter={(value) => (
-                  <span style={{ color: '#94a3b8', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    {value}
-                  </span>
-                )}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
+      {/* Category breakdown donut */}
+      <CategoryDonut />
+
+      {/* 7-day daily spending bar chart */}
+      <SpendingBar />
 
       {/* AI Insights stack */}
       <div className="flex flex-col gap-3">
