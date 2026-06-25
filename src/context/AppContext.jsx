@@ -13,6 +13,8 @@ export const AppProvider = ({ children }) => {
   const [transactions, setTransactions] = useState([]);
   const [profile, setProfile] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
+  const [budgets, setBudgets] = useState([]);
+  const [savingsGoals, setSavingsGoals] = useState([]);
 
   // Fetch real categories, expenses, and profile from Supabase
   const fetchUserData = async (userId) => {
@@ -89,6 +91,31 @@ export const AppProvider = ({ children }) => {
           date: exp.created_at
         }));
         setTransactions(mappedExpenses);
+      }
+
+      // 4. Fetch per-category monthly budgets
+      const { data: budgetData, error: budgetErr } = await supabase
+        .from('budgets')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (budgetErr) {
+        console.error('Error fetching budgets from database:', budgetErr);
+      } else {
+        setBudgets(budgetData || []);
+      }
+
+      // 5. Fetch savings goals
+      const { data: goalsData, error: goalsErr } = await supabase
+        .from('savings_goals')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (goalsErr) {
+        console.error('Error fetching savings goals from database:', goalsErr);
+      } else {
+        setSavingsGoals(goalsData || []);
       }
     } catch (err) {
       console.error('Unexpected error in database fetch sequence:', err);
@@ -206,6 +233,116 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  // Upsert a monthly budget limit for a specific category
+  const setBudget = async (categoryId, monthlyLimit) => {
+    if (!user) return { success: false, error: 'No authenticated user session.' };
+    try {
+      const { data, error } = await supabase
+        .from('budgets')
+        .upsert({
+          user_id: user.id,
+          category_id: categoryId,
+          monthly_limit: parseFloat(monthlyLimit),
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,category_id' })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error upserting budget in database:', error);
+        return { success: false, error };
+      }
+
+      setBudgets(prev => {
+        const idx = prev.findIndex(b => b.category_id === categoryId);
+        if (idx >= 0) {
+          const next = [...prev];
+          next[idx] = data;
+          return next;
+        }
+        return [...prev, data];
+      });
+
+      return { success: true, data };
+    } catch (err) {
+      console.error('Unexpected error upserting budget:', err);
+      return { success: false, error: err };
+    }
+  };
+
+  // Create a new savings goal
+  const createSavingsGoal = async ({ title, target_amount, deadline }) => {
+    if (!user) return { success: false, error: 'No authenticated user session.' };
+    try {
+      const { data, error } = await supabase
+        .from('savings_goals')
+        .insert({
+          user_id: user.id,
+          title: title.trim(),
+          target_amount: parseFloat(target_amount),
+          current_amount: 0,
+          deadline: deadline || null
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating savings goal in database:', error);
+        return { success: false, error };
+      }
+
+      setSavingsGoals(prev => [data, ...prev]);
+      return { success: true, data };
+    } catch (err) {
+      console.error('Unexpected error creating savings goal:', err);
+      return { success: false, error: err };
+    }
+  };
+
+  // Update an existing savings goal
+  const updateSavingsGoal = async (goalId, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('savings_goals')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', goalId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating savings goal in database:', error);
+        return { success: false, error };
+      }
+
+      setSavingsGoals(prev => prev.map(g => g.id === goalId ? data : g));
+      return { success: true, data };
+    } catch (err) {
+      console.error('Unexpected error updating savings goal:', err);
+      return { success: false, error: err };
+    }
+  };
+
+  // Delete a savings goal
+  const deleteSavingsGoal = async (goalId) => {
+    try {
+      const { error } = await supabase
+        .from('savings_goals')
+        .delete()
+        .eq('id', goalId);
+
+      if (error) {
+        console.error('Error deleting savings goal from database:', error);
+        return { success: false, error };
+      }
+
+      setSavingsGoals(prev => prev.filter(g => g.id !== goalId));
+      return { success: true };
+    } catch (err) {
+      console.error('Unexpected error deleting savings goal:', err);
+      return { success: false, error: err };
+    }
+  };
+
   useEffect(() => {
     // 1. Fetch initial session on start
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -231,6 +368,8 @@ export const AppProvider = ({ children }) => {
         setCategories([]);
         setTransactions([]);
         setProfile(null);
+        setBudgets([]);
+        setSavingsGoals([]);
       }
       setLoading(false);
     });
@@ -275,10 +414,16 @@ export const AppProvider = ({ children }) => {
       categories,
       transactions,
       profile,
+      budgets,
+      savingsGoals,
       createProfile,
       updateProfile,
       updateExpense,
       deleteExpense,
+      setBudget,
+      createSavingsGoal,
+      updateSavingsGoal,
+      deleteSavingsGoal,
       refreshData,
       togglePremium,
       totalExpenses,

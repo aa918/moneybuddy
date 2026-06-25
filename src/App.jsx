@@ -12,6 +12,7 @@ import Dashboard from './pages/Dashboard';
 import AddExpense from './pages/AddExpense';
 import Profile from './pages/Profile';
 import History from './pages/History';
+import Budgets from './pages/Budgets';
 import './App.css';
 
 // AnimatedRoutes handles routing state, session checks, and redirection guards
@@ -70,6 +71,7 @@ const AnimatedRoutes = () => {
         <Route path="/add-expense" element={<AddExpense />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/history" element={<History />} />
+        <Route path="/budgets" element={<Budgets />} />
         {/* Dynamic redirection fallback */}
         <Route
           path="/"

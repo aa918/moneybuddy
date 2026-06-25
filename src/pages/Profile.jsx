@@ -81,8 +81,14 @@ const Profile = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.3 }}
-      className="flex-1 flex flex-col p-6 pb-32 gap-6 bg-[#0F1F35] overflow-y-auto no-scrollbar"
+      className="flex-1 flex flex-col p-6 pb-32 gap-6 bg-[#0F1F35] overflow-y-auto no-scrollbar lg:px-8 lg:pb-8"
     >
+      {/* Desktop 2-col grid wrapper */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:items-start">
+
+      {/* ── Left column: Avatar + Premium card ── */}
+      <div className="flex flex-col gap-6">
+
       {/* Avatar details block */}
       <div className="flex flex-col items-center text-center mt-2 select-none">
         <div className="relative mb-3">
@@ -154,7 +160,11 @@ const Profile = () => {
             {isPremium ? 'Downgrade Subscription' : 'Unlock VIP for $4.99/mo'}
           </button>
         </div>
-      </div>
+      </div>{/* end premium card */}
+      </div>{/* end left column */}
+
+      {/* ── Right column: Financial Profile + Settings ── */}
+      <div className="flex flex-col gap-6">
 
       {/* Financial Profile Card */}
       <div className="flex flex-col gap-2.5 bg-brand-blue-card rounded-3xl p-5 border border-white/5">
@@ -320,6 +330,9 @@ const Profile = () => {
           </button>
         </div>
       </div>
+
+      </div>{/* end right column */}
+      </div>{/* end desktop grid */}
     </motion.div>
   );
 };

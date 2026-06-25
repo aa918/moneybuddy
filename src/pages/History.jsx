@@ -229,10 +229,13 @@ const History = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.3 }}
-      className="flex-1 flex flex-col p-5 pb-32 gap-4 bg-[#0F1F35] overflow-y-auto no-scrollbar relative"
+      className="flex-1 flex flex-col bg-[#0F1F35] overflow-y-auto no-scrollbar relative"
     >
+      {/* Inner max-width container */}
+      <div className="flex-1 flex flex-col p-5 pb-32 gap-4 lg:px-8 lg:pb-8 lg:max-w-4xl lg:mx-auto lg:w-full">
+
       {/* Filters Selectors Row */}
-      <div className="grid grid-cols-2 gap-3 shrink-0">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
         {/* Month Selector dropdown */}
         <div className="relative group">
           <select
@@ -359,6 +362,8 @@ const History = () => {
         </div>
       )}
 
+      </div>{/* end inner max-width container */}
+
       {/* Slide-up Edit Drawer Overlay */}
       <AnimatePresence>
         {editingTransaction && (
@@ -369,16 +374,16 @@ const History = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={closeEditDrawer}
-              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm z-40 cursor-pointer"
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-40 cursor-pointer"
             />
 
-            {/* Slide up Drawer */}
+            {/* Drawer — bottom sheet on mobile, centered modal on desktop */}
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 260 }}
-              className="absolute bottom-0 left-0 right-0 bg-[#0F1F35] border-t border-white/10 rounded-t-[32px] p-6 pb-8 z-50 flex flex-col gap-4 select-none max-h-[92%] overflow-y-auto no-scrollbar"
+              className="fixed bottom-0 left-0 right-0 bg-[#0F1F35] border-t border-white/10 rounded-t-[32px] p-6 pb-8 z-50 flex flex-col gap-4 select-none max-h-[92%] overflow-y-auto no-scrollbar lg:bottom-auto lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:max-w-xl lg:w-full lg:rounded-3xl lg:border lg:border-white/10 lg:border-t-white/10 lg:max-h-[85vh]"
             >
               {/* Header */}
               <div className="flex items-center justify-between pb-2 border-b border-white/5">
@@ -518,11 +523,11 @@ const History = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowDeleteConfirm(false)}
-              className="absolute inset-0 bg-slate-950/75 backdrop-blur-md z-55 cursor-pointer"
+              className="fixed inset-0 bg-slate-950/75 backdrop-blur-md z-55 cursor-pointer"
             />
 
             {/* Modal Card container */}
-            <div className="absolute inset-0 z-55 flex items-center justify-center p-6 pointer-events-none">
+            <div className="fixed inset-0 z-55 flex items-center justify-center p-6 pointer-events-none">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}

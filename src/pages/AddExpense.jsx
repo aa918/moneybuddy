@@ -27,7 +27,7 @@ const iconMap = {
 };
 
 const AddExpense = () => {
-  const { categories, rawUser, refreshData } = useApp();
+  const { categories, rawUser, refreshData, budgets, transactions } = useApp();
   const { addToast } = useToast();
   const navigate = useNavigate();
   
@@ -103,7 +103,31 @@ const AddExpense = () => {
       // 2. Refresh global state (only if insert succeeds)
       await refreshData();
 
-      // 3. Show success overlay micro-interaction, delay before redirecting
+      // 3. Check if this expense pushes the category over its budget threshold
+      const categoryBudget = budgets.find(b => b.category_id === selectedCategory.id);
+      if (categoryBudget && parseFloat(categoryBudget.monthly_limit) > 0) {
+        const limit = parseFloat(categoryBudget.monthly_limit);
+        const now = new Date();
+        const monthSpent = transactions
+          .filter(t => {
+            const d = new Date(t.date);
+            return t.categoryId === selectedCategory.id
+              && d.getFullYear() === now.getFullYear()
+              && d.getMonth() === now.getMonth();
+          })
+          .reduce((s, t) => s + t.amount, 0) + parsedAmount;
+
+        const pct = (monthSpent / limit) * 100;
+        if (pct >= 100) {
+          addToast(`You exceeded your ${selectedCategory.name} budget!`, 'warning');
+        } else if (pct >= 90) {
+          addToast(`${selectedCategory.name} at ${pct.toFixed(0)}% — almost at your limit`, 'warning');
+        } else if (pct >= 70) {
+          addToast(`${selectedCategory.name} at ${pct.toFixed(0)}% of budget`, 'warning');
+        }
+      }
+
+      // 4. Show success overlay micro-interaction, delay before redirecting
       setIsSuccess(true);
       await new Promise(resolve => setTimeout(resolve, 1100));
 
@@ -122,7 +146,7 @@ const AddExpense = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.3 }}
-      className="flex-1 flex flex-col p-6 pb-36 justify-between bg-[#0F1F35] relative overflow-hidden"
+      className="flex-1 flex flex-col p-6 pb-36 justify-between bg-[#0F1F35] relative overflow-hidden lg:max-w-lg lg:mx-auto lg:w-full lg:pb-10 lg:justify-start lg:gap-8"
     >
       {/* Success Animation Overlay */}
       <AnimatePresence>
@@ -219,7 +243,7 @@ const AddExpense = () => {
             Select Category
           </h3>
           
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 lg:grid-cols-6 gap-3">
             {categories.map((cat) => {
               const Icon = iconMap[cat.icon] || CreditCard;
               const isSelected = selectedCategory?.id === cat.id;
@@ -262,9 +286,9 @@ const AddExpense = () => {
         )}
       </div>
 
-      {/* Floating Save button */}
-      <div className="absolute bottom-28 left-0 right-0 px-6 pointer-events-none">
-        <div className="max-w-sm mx-auto pointer-events-auto">
+      {/* Save button — floating on mobile, in-flow on desktop */}
+      <div className="absolute bottom-28 left-0 right-0 px-6 pointer-events-none lg:static lg:bottom-auto lg:left-auto lg:right-auto lg:px-0 lg:mt-2">
+        <div className="max-w-sm mx-auto pointer-events-auto lg:max-w-none">
           <button
             onClick={handleSave}
             className={`w-full py-4 rounded-2xl font-bold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-1.5 cursor-pointer transition-all duration-250 ${

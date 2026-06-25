@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
+import Sidebar from './Sidebar';
 import BottomNav from './BottomNav';
 import Toast from './Toast';
 import { ArrowLeft, Bell, Crown } from 'lucide-react';
@@ -15,7 +16,6 @@ const MobileAppLayout = ({ children }) => {
   const isOnboardingPage = currentPath === '/onboarding';
   const hideBars = isLoginPage || isOnboardingPage || loading;
 
-  // Helper to determine page title
   const getHeaderTitle = () => {
     switch (currentPath) {
       case '/dashboard':
@@ -33,44 +33,44 @@ const MobileAppLayout = ({ children }) => {
         return <span className="font-semibold text-lg text-white">Profile & Settings</span>;
       case '/history':
         return <span className="font-semibold text-lg text-white">History</span>;
+      case '/budgets':
+        return <span className="font-semibold text-lg text-white">Budgets & Goals</span>;
       default:
         return <span className="font-semibold text-lg text-white">MoneyBuddy</span>;
     }
   };
 
   return (
-    // Centering desktop viewport page shell
-    <div className="flex items-center justify-center min-h-screen bg-slate-950 p-0 sm:p-4 transition-all duration-300">
-      {/* Sleek Mobile Device Frame Mockup */}
-      <div className="w-full sm:max-w-[420px] h-screen sm:h-[850px] sm:rounded-[40px] sm:border-[8px] sm:border-slate-800 bg-[#0F1F35] sm:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] relative overflow-hidden flex flex-col transition-all duration-300">
-        
-        {/* Device Notch/Speaker for premium realism */}
-        <div className="hidden sm:block absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-2xl z-50 overflow-hidden">
-          <div className="w-12 h-1 bg-slate-900 rounded-full mx-auto mt-2" />
-        </div>
+    <div className="min-h-screen bg-[#0F1F35] flex">
+      {/* Sidebar — desktop only (lg:) */}
+      {!hideBars && <Sidebar />}
 
-        {/* Top Glassmorphic App Bar (Hidden on Login screen) */}
+      {/* Main column — full width on mobile, flex-1 on desktop */}
+      <div className="flex-1 flex flex-col min-h-screen relative overflow-hidden">
+
+        {/* Top App Bar */}
         {!hideBars && (
-          <header className="glassmorphism sticky top-0 left-0 right-0 h-16 px-6 z-40 flex items-center justify-between shrink-0 select-none">
-            {/* Left Button: Back button on sub-pages */}
+          <header className="glassmorphism sticky top-0 left-0 right-0 h-16 px-5 lg:px-8 z-40 flex items-center justify-between shrink-0 select-none">
+
+            {/* Left: back button on mobile sub-pages, hidden on desktop (sidebar handles nav) */}
             <div className="w-10">
-              {currentPath !== '/dashboard' ? (
+              {currentPath !== '/dashboard' && (
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="p-2 -ml-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
+                  className="lg:hidden p-2 -ml-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
                   aria-label="Go Back"
                 >
                   <ArrowLeft size={20} />
                 </button>
-              ) : null}
+              )}
             </div>
 
-            {/* Center Area: Dynamic Page Title */}
-            <div className="flex-1 flex justify-center text-center">
+            {/* Center: dynamic page title */}
+            <div className="flex-1 flex justify-center text-center lg:justify-start lg:ml-0">
               {getHeaderTitle()}
             </div>
 
-            {/* Right Area: Profile / Premium status */}
+            {/* Right: profile avatar (dashboard) or bell icon (sub-pages) */}
             <div className="w-10 flex justify-end">
               {currentPath === '/dashboard' ? (
                 <button
@@ -81,7 +81,6 @@ const MobileAppLayout = ({ children }) => {
                   <div className={`w-8 h-8 rounded-full overflow-hidden border-2 ${
                     isPremium ? 'border-amber-400' : 'border-slate-500'
                   }`}>
-                    {/* SVG Avatar illustration to avoid broken web-links offline */}
                     <svg viewBox="0 0 32 32" className="w-full h-full bg-slate-700 text-slate-300">
                       <path fill="currentColor" d="M16 8a5 5 0 1 0 5 5 5 5 0 0 0-5-5zm0 11c-6.13 0-11 3.25-11 7h22c0-3.75-4.87-7-11-7z" />
                     </svg>
@@ -93,7 +92,7 @@ const MobileAppLayout = ({ children }) => {
                   )}
                 </button>
               ) : (
-                <button 
+                <button
                   className="p-2 -mr-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 active:scale-95 transition-all cursor-pointer relative"
                   aria-label="Notifications"
                 >
@@ -105,15 +104,15 @@ const MobileAppLayout = ({ children }) => {
           </header>
         )}
 
-        {/* Toast notification layer — absolute inside the frame, below header */}
+        {/* Toast notification layer — absolute inside the column, below the header */}
         {!hideBars && <Toast />}
 
-        {/* Page Content Body (Scrollable with hidden scrollbars) */}
-        <main className="flex-1 overflow-y-auto no-scrollbar relative flex flex-col bg-slate-950">
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto no-scrollbar relative flex flex-col bg-[#0F1F35]">
           {children}
         </main>
 
-        {/* Bottom Floating Navigation (Hidden on Login screen) */}
+        {/* Bottom nav — mobile only (hidden on lg:) */}
         {!hideBars && <BottomNav />}
       </div>
     </div>

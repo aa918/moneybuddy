@@ -1,7 +1,19 @@
 import React from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, AlertCircle, X } from 'lucide-react';
+import { Check, AlertCircle, AlertTriangle, X } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
+
+const toastStyles = {
+  success: 'bg-brand-mint/10 border-brand-mint/30 text-brand-mint',
+  warning: 'bg-amber-400/10 border-amber-400/30 text-amber-400',
+  error:   'bg-rose-500/10 border-rose-500/30 text-rose-400',
+};
+
+const toastIcons = {
+  success: <Check size={14} className="shrink-0 stroke-[3]" />,
+  warning: <AlertTriangle size={14} className="shrink-0" />,
+  error:   <AlertCircle size={14} className="shrink-0" />,
+};
 
 const Toast = () => {
   const { toasts, removeToast } = useToast();
@@ -18,15 +30,10 @@ const Toast = () => {
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
             className={`pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-2xl border shadow-xl text-xs font-bold w-full backdrop-blur-sm ${
-              toast.type === 'success'
-                ? 'bg-brand-mint/10 border-brand-mint/30 text-brand-mint'
-                : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+              toastStyles[toast.type] ?? toastStyles.error
             }`}
           >
-            {toast.type === 'success'
-              ? <Check size={14} className="shrink-0 stroke-[3]" />
-              : <AlertCircle size={14} className="shrink-0" />
-            }
+            {toastIcons[toast.type] ?? toastIcons.error}
             <span className="flex-1">{toast.message}</span>
             <button
               onClick={() => removeToast(toast.id)}
