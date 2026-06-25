@@ -7,6 +7,7 @@ import MobileAppLayout from './components/MobileAppLayout';
 import { Wallet } from 'lucide-react';
 
 import Login from './pages/Login';
+import Landing from './pages/Landing';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import AddExpense from './pages/AddExpense';
@@ -39,12 +40,13 @@ const AnimatedRoutes = () => {
   const isAuthenticated = !!user;
   const isAuthPage = location.pathname === '/login';
   const isOnboardingPage = location.pathname === '/onboarding';
+  const isLandingPage = location.pathname === '/';
   const needsOnboarding = profile === null;
 
   // 2. Auth Access Guards
   if (!isAuthenticated) {
-    if (!isAuthPage) {
-      // Unauthenticated -> Login page
+    if (!isAuthPage && !isLandingPage) {
+      // Unauthenticated -> Login page (landing page is allowed through)
       return <Navigate to="/login" replace />;
     }
   } else {
@@ -55,7 +57,7 @@ const AnimatedRoutes = () => {
         return <Navigate to="/onboarding" replace />;
       }
     } else {
-      if (isOnboardingPage || isAuthPage) {
+      if (isOnboardingPage || isAuthPage || isLandingPage) {
         // Already onboarded -> Dashboard page
         return <Navigate to="/dashboard" replace />;
       }
@@ -72,11 +74,7 @@ const AnimatedRoutes = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/history" element={<History />} />
         <Route path="/budgets" element={<Budgets />} />
-        {/* Dynamic redirection fallback */}
-        <Route
-          path="/"
-          element={<Navigate to={isAuthenticated ? (needsOnboarding ? "/onboarding" : "/dashboard") : "/login"} replace />}
-        />
+        <Route path="/" element={<Landing />} />
         <Route
           path="*"
           element={<Navigate to={isAuthenticated ? (needsOnboarding ? "/onboarding" : "/dashboard") : "/login"} replace />}

@@ -14,7 +14,8 @@ const MobileAppLayout = ({ children }) => {
 
   const isLoginPage = currentPath === '/login';
   const isOnboardingPage = currentPath === '/onboarding';
-  const hideBars = isLoginPage || isOnboardingPage || loading;
+  const isLandingPage = currentPath === '/';
+  const hideBars = isLoginPage || isOnboardingPage || isLandingPage || loading;
 
   const getHeaderTitle = () => {
     switch (currentPath) {
